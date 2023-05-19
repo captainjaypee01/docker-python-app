@@ -1,0 +1,10 @@
+version: '3'
+services:
+  sump-pump-gateway:
+    image: sump-pump-gateway
+    container_name: sump-pump-gateway-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/opt/app/sump-pump-gateway

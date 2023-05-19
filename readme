@@ -1,0 +1,5 @@
+RUN THIS COMMAND
+
+export SRC_DIR="backend-apis/gateway_to_backend/protocol_buffers_files"
+mkdir proto-py
+for a in $SRC_DIR/*.proto; do protoc -I $SRC_DIR --python_out=proto-py "$a"; done

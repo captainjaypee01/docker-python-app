@@ -1,4 +1,6 @@
 certs/
 env/
+proto-py/
 
 *.env
+

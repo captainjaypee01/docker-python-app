@@ -6,3 +6,8 @@ Jinja2==3.1.2
 MarkupSafe==2.1.2
 Werkzeug==2.3.3
 requests==2.25.1
+python-dotenv
+google
+protobuf
+PyYAML==5.4
+paho-mqtt==1.4.0

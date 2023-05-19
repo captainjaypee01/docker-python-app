@@ -1,15 +1,23 @@
 import os
 import logging
+import sys
 from dotenv import load_dotenv
 from threading import Thread, Lock
 from utils.argument_tools import ParserHelper
 from utils.log_tools import LoggerHelper
 from protocol.mqtt_wrapper import MQTTWrapper
+from datetime import datetime
 
 from __about__ import __version__ as app_version, __pkg_name__
 
 # Load environment variables from the .env file in the parent directory
 load_dotenv('app_service.env')
+
+# Import Protocol Buffers message classes
+sys.path.insert(0, "proto-py")
+import generic_message_pb2 as generic_message
+import wp_global_pb2 as wp_global
+import data_message_pb2 as data_message
 
 class ApplicationService(Thread):
     
@@ -43,7 +51,28 @@ class ApplicationService(Thread):
         )
 
     def _on_received_data(self, client, userdata, message):
-        print(message.payload)
+        now = datetime.utcnow()
+        proto_msg = generic_message.GenericMessage()
+        proto_msg.ParseFromString(message.payload)
+        recv_packet = proto_msg.wirepas.packet_received_event
+        
+        nodeid = str(hex(recv_packet.source_address)).replace("0x","")
+        networkid = str(hex(recv_packet.network_address)).replace("0x","")
+        data = recv_packet.payload.hex()
+        # print(recv_packet)
+        dataStr = '{{"GatewayID":"{gatewayid}","NetworkID":"{network}","NodeID":"{node}","System":{system},"EP":{ep},"Data":"{datapack}","Timestamp":{time},"Travel":{travel},"Hop":{hop}}}'.format(
+                   gatewayid=recv_packet.header.gw_id,
+                   network=networkid,
+                   node=nodeid,
+                   system=recv_packet.source_endpoint,
+                   ep=recv_packet.destination_endpoint,
+                   datapack=data,
+                   time=recv_packet.rx_time_ms_epoch,
+                   travel=recv_packet.travel_time_ms,
+                   hop=recv_packet.hop_count
+                 )
+    
+        self.logger.info(dataStr)
 
     def _on_mqtt_wrapper_termination_cb(self):
         
