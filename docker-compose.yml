@@ -4,7 +4,39 @@ services:
     image: sump-pump-gateway
     container_name: sump-pump-gateway-container
     build:
-      context: .
+      context: ./sump-pump-gw
       dockerfile: Dockerfile
     volumes:
-      - .:/opt/app/sump-pump-gateway
+      - ./sump-pump-gw:/opt/app/sump-pump-gateway
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    depends_on:
+      - mysql_db
+    networks:
+      - smart_iot_network
+  mysql_db:
+    image: mysql:latest
+    container_name: mysql_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_db_data:/var/lib/mysql
+      - ./docker/mysql/mysql.cnf:/etc/mysql/conf.d/mysql.conf.cnf
+      - ./docker/mysql/init.sql:/usr/src/db/init.sql
+    networks:
+      - smart_iot_network
+
+networks:
+  smart_iot_network:
+    driver: bridge
+
+volumes:
+  mysql_db_data:
+    driver: local

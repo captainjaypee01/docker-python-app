@@ -13,14 +13,7 @@ from datetime import datetime
 from __about__ import __version__ as app_version, __pkg_name__
 
 #jobs
-from jobs.ProcessSource1 import ProcessSource1
-from jobs.ProcessSource5 import ProcessSource5
-from jobs.ProcessSource6 import ProcessSource6
-from jobs.ProcessSource9 import ProcessSource9
-from jobs.ProcessSource146 import ProcessSource146
-from jobs.ProcessSource152 import ProcessSource152
-from jobs.ProcessWirepasSource import ProcessWirepasSource
-from jobs.ProcessSource5 import ProcessSource5
+from jobs import ProcessSource1, ProcessSource5, ProcessSource9, ProcessSource6, ProcessSource146, ProcessSource152, ProcessWirepasSource
 
 # Load environment variables from the .env file in the parent directory
 load_dotenv('app_service.env')
@@ -118,31 +111,31 @@ class ApplicationService(Thread):
         jsonPayload = json.dumps(payload)
 
         if payload['source_endpoint'] == 1 and payload['destination_endpoint'] == 100:
-            job = ProcessSource1()
+            job = ProcessSource1(self.logger)
             job.process(jsonPayload)
 
         if payload['source_endpoint'] == 6 and payload['destination_endpoint'] == 100:
-            job = ProcessSource6()
+            job = ProcessSource6(self.logger)
             job.process(jsonPayload)
 
         if payload['source_endpoint'] == 5:
-            job = ProcessSource5()
+            job = ProcessSource5(self.logger)
             job.process(jsonPayload)
             
         if payload['source_endpoint'] == 9 and payload['destination_endpoint'] == 9:
-            job = ProcessSource9()
+            job = ProcessSource9(self.logger)
             job.process(jsonPayload)
             
         if payload['source_endpoint'] == 146 and payload['destination_endpoint'] == 155:
-            job = ProcessSource146()
+            job = ProcessSource146(self.logger)
             job.process(jsonPayload)
             
         if payload['source_endpoint'] == 152 and payload['destination_endpoint'] == 155:
-            job = ProcessSource152()
+            job = ProcessSource152(self.logger)
             job.process(jsonPayload)
             
         if payload['source_endpoint'] == 240 or payload['source_endpoint'] == 247:
-            job = ProcessWirepasSource()
+            job = ProcessWirepasSource(self.logger)
             job.process(jsonPayload)
         
 
