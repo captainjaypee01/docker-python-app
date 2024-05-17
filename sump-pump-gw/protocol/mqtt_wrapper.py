@@ -92,8 +92,6 @@ class MQTTWrapper(Thread):
 
     def _on_disconnect(self, userdata, rc):
         if rc != 0:
-            os.system("sudo systemctl stop wirepasSink1.service")
-            self.logger.info("Stop Sink Service")
             self.logger.error(
                 "MQTT unexpected disconnection (network or broker originated):"
                 "%s (%s)",
@@ -153,8 +151,6 @@ class MQTTWrapper(Thread):
             return sock
 
         if self.connected:
-            os.system("sudo systemctl stop wirepasSink1.service")
-            self.logger.info("Stop Sink Service")
             self.logger.error("MQTT Inner loop, unexpected disconnection")
         elif not self.first_connection_done:
             # It's better to avoid retrying if the first connection was not successful

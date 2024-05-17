@@ -1,42 +1,62 @@
 version: '3'
 services:
+  redis:
+    image: "redis:latest"
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - smart_iot_network
+    volumes:
+      - redis_data:/data
+    restart: always
   sump-pump-gateway:
     image: sump-pump-gateway
     container_name: sump-pump-gateway-container
     build:
-      context: ./sump-pump-gw
-      dockerfile: Dockerfile
-    volumes:
-      - ./sump-pump-gw:/opt/app/sump-pump-gateway
+      context: .
+      dockerfile: sump-pump-gw/Dockerfile
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    depends_on:
-      - mysql_db
+    # depends_on:
+    #   - mysql_db
     networks:
       - smart_iot_network
-  mysql_db:
-    image: mysql:latest
-    container_name: mysql_db
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    volumes:
-      - mysql_db_data:/var/lib/mysql
-      - ./docker/mysql/mysql.cnf:/etc/mysql/conf.d/mysql.conf.cnf
-      - ./docker/mysql/init.sql:/usr/src/db/init.sql
+    restart: always
+  sump-pump-serial:
+    image: sump-pump-serial
+    container_name: sump-pump-serial-container
+    build:
+      context: .
+      dockerfile: sump-pump-serial/Dockerfile
     networks:
       - smart_iot_network
+    restart: always
+  # mysql_db:
+  #   image: mysql:latest
+  #   container_name: mysql_db
+  #   restart: unless-stopped
+  #   environment:
+  #     MYSQL_DATABASE: ${MYSQL_DATABASE}
+  #     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+  #     MYSQL_USER: ${MYSQL_USER}
+  #     MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+  #   volumes:
+  #     - mysql_db_data:/var/lib/mysql
+  #     - ./docker/mysql/mysql.cnf:/etc/mysql/conf.d/mysql.conf.cnf
+  #     - ./docker/mysql/init.sql:/usr/src/db/init.sql
+  #   networks:
+  #     - smart_iot_network
 
 networks:
   smart_iot_network:
     driver: bridge
 
 volumes:
-  mysql_db_data:
-    driver: local
+  redis_data:
+# volumes:
+  # mysql_db_data:
+  #   driver: local
