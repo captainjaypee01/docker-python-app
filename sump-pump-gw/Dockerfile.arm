@@ -1,0 +1,34 @@
+# Use ARM-compatible base image for Python 3.9
+FROM arm32v7/debian:bullseye
+
+# Install Python 3.9 from Debian package repositories
+RUN apt-get update && apt-get install -y python3.9 python3-pip
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    zlib1g-dev \
+    libncurses5-dev \
+    libgdbm-dev \
+    libnss3-dev \
+    libssl-dev \
+    libreadline-dev \
+    libffi-dev \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory
+WORKDIR /opt/app/sump-pump-gateway
+
+# Copy shared folder and application code
+COPY ./shared /opt/app/sump-pump-gateway/shared
+COPY ./sump-pump-gw /opt/app/sump-pump-gateway
+
+# Copy requirements file and install dependencies
+COPY ./sump-pump-gw/requirements.txt requirements.txt
+RUN apt-get update && apt-get install -y python3-pip && \
+    pip3 install --upgrade pip setuptools && \
+    pip3 install --no-cache-dir -r requirements.txt
+
+# Set the command to run the application
+CMD ["python3", "app.py"]

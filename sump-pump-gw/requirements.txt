@@ -13,5 +13,6 @@ PyYAML>=5.4
 paho-mqtt==1.5.1
 SQLAlchemy==1.4.34  # Specify the version for 'SQLAlchemy'
 PyMySQL==1.0.2
+mysql-connector-python
 pyserial==3.5
 redis

@@ -55,8 +55,9 @@ class SerialPortListener():
 
             try:
                 while not self.stop_event.is_set():
-                    data = self.serial_port_instance.readline()
-                    if data:
+                    data_bytes = self.serial_port_instance.readline()
+                    data = data_bytes.hex()
+                    if data_bytes:
                         self.logger.info(f"Received from serial port: {data}")
                         self.redis_client.publish_message('gw-event/received_data', data)
                         # Send data to redis below here...
@@ -76,6 +77,7 @@ class SerialPortListener():
         self.listening_thread = threading.Thread(target=self.read_serial_data)
         self.listening_thread.start()
 
+        self.initialize_serial_port()
         # if self.is_serial_port_available():
         #     print(f"Serial port {self.serial_port} is available. Starting listening thread.")
         #     self.listening_thread = threading.Thread(target=self.read_serial_data)
@@ -94,8 +96,8 @@ class SerialPortListener():
     def redis_test_send_data(self, message):
         
         # Send test data to redis below here...
-        self.logger.info(f"TEST MESSAGE {message}")
-        self.redis_client.publish_message('gw-event/received_data', message)
+        # self.logger.info(f"TEST MESSAGE {message}")
+        # self.redis_client.publish_message('gw-event/received_data', message)
         pass
 
 
@@ -110,17 +112,17 @@ def main():
 
     try:
         logger.info("Start Sending Data To Redis")
-        cnt = 1
-        while True:
+        # cnt = 1
+        # while True:
             # Your main application logic can go here
-            serialApp.redis_test_send_data(f"HELLO WORLD {cnt}")
+            # serialApp.redis_test_send_data(f"\x03\x04\x05")
             # serialApp.redis_test_send_data("HELLO WORLD 2")
             # serialApp.redis_test_send_data("HELLO WORLD 3")
             # serialApp.redis_test_send_data("HELLO WORLD 4")
-            cnt = cnt + 1
-            if(cnt == 100):
-                cnt = 1
-            time.sleep(5)
+            # cnt = cnt + 1
+            # if(cnt == 100):
+            #     cnt = 1
+            # time.sleep(5)
     except KeyboardInterrupt:
         logger.info("Stopping the application...")
         # serialApp.stop_listening_thread()

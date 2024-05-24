@@ -18,6 +18,8 @@ from __about__ import __version__ as app_version, __pkg_name__
 #jobs
 from jobs import ProcessSource1, ProcessSource5, ProcessSource9, ProcessSource6, ProcessSource146, ProcessSource152, ProcessWirepasSource
 
+from models.node_reading import NodeReading
+from models.database import session
 # Load environment variables from the .env file in the parent directory
 load_dotenv('app_service.env')
 
@@ -87,6 +89,9 @@ class ApplicationService(RedisClient):
 
     def _on_recevied_redis(self, data):
         self.logger.info(f"Received data from Redis: {data}")
+        new_reading = NodeReading(NodeID="1234abcd", payload=data)
+        session.add(new_reading)
+        session.commit()
         # Send data to MQTT broker
         # self.mqtt_client.publish(self.topic, data)
 

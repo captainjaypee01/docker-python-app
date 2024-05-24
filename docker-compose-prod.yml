@@ -9,50 +9,46 @@ services:
       - smart_iot_network
     volumes:
       - redis_data:/data
-    restart: always
   mysql:
-    image: mysql:8.0
+    image: arm64v8/mysql:8.0
     container_name: mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: mydatabase
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: smart
+      MYSQL_DATABASE: smartiot
+      MYSQL_USER: smart_user
+      MYSQL_PASSWORD: userpass
     ports:
-      - "3308:3308"
+      - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d:ro
     networks:
       - smart_iot_network
+
   sump-pump-gateway:
-    image: jbdala01/sump-pump-gateway
+    image: jbdala01/sump-pump-gateway:arm-latest
     container_name: sump-pump-gateway-container
-    build:
-      context: .
-      dockerfile: sump-pump-gw/Dockerfile
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
-      - ./sump-pump-gw/certs:/etc/certs  # Mount the certificates
+      - ./certs:/etc/certs  # Mount the certificates
     env_file:
       - ./app_service.env
     networks:
       - smart_iot_network
-    restart: always
+
   sump-pump-serial:
-    image: jbdala01/sump-pump-serial
+    image: jbdala01/sump-pump-serial:arm-latest
     container_name: sump-pump-serial-container
-    build:
-      context: .
-      dockerfile: sump-pump-serial/Dockerfile
+    devices:
+      - "/dev/ttyAMA0:/dev/ttyAMA0"
     networks:
       - smart_iot_network
-    restart: always
+
 networks:
   smart_iot_network:
     driver: bridge
@@ -60,6 +56,3 @@ networks:
 volumes:
   redis_data:
   mysql-data:
-# volumes:
-  # mysql_db_data:
-  #   driver: local
